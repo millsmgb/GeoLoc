@@ -1,0 +1,79 @@
+﻿@{
+    Layout = "~/_SiteLayout.cshtml";
+    Page.Title = "Test Mapping Page";
+}
+
+@section featured {
+<section class="featured">
+    <div class="content-wrapper">
+        <hgroup class="title">
+            <h1>@Page.Title.</h1>
+            <h2>A map should display here giving you your exact coordinates on a Google Map spread</h2>
+        </hgroup>
+        <button id="tracker">Click Here to start geolocation</button>
+        <button id="stopper" style="display:none;">Click Here to stop geolocation</button>
+    </div>
+</section>
+}
+
+
+<section id="mappingStuff" style="display:none;">
+    <section class="stuff" style="text-align:center;">
+        <div id="map-canvas" style="width: 300px; height: 400px; text-align: center; display:none;"></div>
+        <div id="loading">
+            <p>Map will load once you click stop geolocation</p>
+        </div>
+    </section>
+
+    <section class="coords" style="text-align:center;">
+        <table id="coords-table" border="1" style="text-align:center;">
+            <tr>
+                <th>latitude</th>
+                <th>longitude</th>
+            </tr>
+        </table>
+        <h3>Distance Travelled</h3>
+        <p id="distlatlon"></p>
+        <h3>Average Speed</h3>
+        <p id="speedlatlon"></p>
+        <h3>Average Speed in km/h</h3>
+        <p id="speedlatlonKMH"></p>
+        <h3>Time Taken</h3>
+        <p id="timelatlon"></p>
+    </section>
+</section>
+
+<p id="map-error"></p>
+
+<script>
+    var id, start, elapsed;
+
+    $("#tracker").click(function () {
+
+
+        if (navigator.geolocation) {
+            $("#tracker").hide();
+
+            $("#stopper").show();
+            $("#mappingStuff").slideDown();
+
+            start = new Date();
+            id = navigator.geolocation.watchPosition(showPosition);
+        } else {
+            $("#map-error").append("Geolocation is not supported by this browser");
+        }
+    });
+
+    $("#stopper").click(function () {
+        $("#stopper").hide();
+
+        $("#loading").hide();
+        $("#map-canvas").show();
+
+        navigator.geolocation.clearWatch(id);
+        elapsed = new Date() - start;
+        initialise();
+
+        calcStats(elapsed);
+    })
+</script>
