@@ -1,4 +1,18 @@
-﻿function initialise() {
+﻿var latLonArray = [];
+var latitudes = [];
+var longitudes = [];
+var speeds = [];
+var times = [];
+var distances = [];
+var start;
+
+var myLatLng
+
+function setStart(startTime) {
+    this.start = startTime;
+}
+
+function initialise() {
 
     var mapOptions = {
         zoom: 15,
@@ -34,11 +48,22 @@
 function showPosition(position) {
     var latitude = position.coords.latitude;
     var longitude = position.coords.longitude;
+    var currSpeed = 0;
+
+    if (isNaN(position.coords.speed) != true) {
+        currSpeed = position.coords.speed;
+    }
+
+    var currTime = position.timestamp;
+
+    var timeElapsed = (currTime - start) / 1000;
 
     console.log(latitude);
     console.log(longitude);
+    console.log(currSpeed);
+    console.log(timeElapsed);
 
-    $('#coords-table').append('<tr> <td>' + latitude + '</td> <td>' + longitude + '</td> </tr>');
+    $('#coords-table tbody').append('<tr> <td>' + latitude + '</td> <td>' + longitude + '</td> <td>' + currSpeed + '</td> <td>' + timeElapsed + '</td> </tr>');
 
     var tempLat = parseFloat(latitude);
     var tempLon = parseFloat(longitude);
@@ -47,16 +72,13 @@ function showPosition(position) {
 
     latitudes.push(latitude);
     longitudes.push(longitude);
+    speeds.push(currSpeed);
+    times.push(timeElapsed);
+
     latLonArray.push(myLatLng);
 
     console.log(latLonArray);
 }
-
-var latLonArray = [];
-var latitudes = [];
-var longitudes = [];
-
-var myLatLng
 
 google.maps.event.addDomListener(window, 'load', initialise)
 
@@ -72,7 +94,10 @@ function calcStats(elapsed) {
             var tempLat2 = latitudes[j + 1];
             var tempLong2 = longitudes[j + 1];
 
-            distTemp = distTemp + distance(tempLat1, tempLong1, tempLat2, tempLong2, 'K');
+            var calcDistance = distance(tempLat1, tempLong1, tempLat2, tempLong2, 'K');
+            distances.push(calcDistance);
+
+            distTemp = distTemp + calcDistance;
 
             console.log(distance(tempLat1, tempLong1, tempLat2, tempLong2, 'K'));
             console.log(distTemp);
@@ -85,7 +110,7 @@ function calcStats(elapsed) {
 
     var speed = distTemp / timeSeconds;
 
-    var speedkmh = speed / 3.6;
+    var speedkmh = speed * 3.6;
 
     $("#distlatlon").append(distTemp + " metres");
 
@@ -94,6 +119,44 @@ function calcStats(elapsed) {
     $("#speedlatlonKMH").append(speedkmh + " km/h");
 
     $("#timelatlon").append(timeSeconds + " seconds");
+
+}
+
+function generateCharts() {
+
+    var dataDist = {
+        labels: times,
+        datasets: [{
+            label: "Variation in Distance",
+            fillColor: "rgba(151,187,205,0.2)",
+            strokeColor: "rgba(151,187,205,1)",
+            pointColor: "rgba(151,187,205,1)",
+            pointStrokeColor: "#fff",
+            pointHighlightFill: "#fff",
+            pointHighlightStroke: "rgba(151,187,205,1)",
+            data: distances
+        }]
+    };
+
+    var dataSpd = {
+        labels: times,
+        datasets: [{
+            label: "Variation in Speed",
+            fillColor: "rgba(151,187,205,0.2)",
+            strokeColor: "rgba(151,187,205,1)",
+            pointColor: "rgba(151,187,205,1)",
+            pointStrokeColor: "#fff",
+            pointHighlightFill: "#fff",
+            pointHighlightStroke: "rgba(151,187,205,1)",
+            data: speeds
+        }]
+    };
+
+    var distChart = $("#distanceChart").get(0).getContext("2d");
+    var spdChart = $("#speedChart").get(0).getContext("2d");
+
+    var newDistChart = new Chart(distChart).Line(dataDist);
+    var newSpdChart = new Chart(spdChart).Line(dataSpd);
 
 }
 
