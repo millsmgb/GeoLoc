@@ -63,7 +63,7 @@ function showPosition(position) {
     console.log(currSpeed);
     console.log(timeElapsed);
 
-    $('#coords-table tbody').append('<tr> <td>' + latitude + '</td> <td>' + longitude + '</td> <td>' + currSpeed + '</td> <td>' + timeElapsed + '</td> </tr>');
+    $('#coords-table tbody').append('<tr> <td>' + latitude.toFixed(5) + '</td> <td>' + longitude.toFixed(5) +'</td> </tr>');
 
     var tempLat = parseFloat(latitude);
     var tempLon = parseFloat(longitude);
